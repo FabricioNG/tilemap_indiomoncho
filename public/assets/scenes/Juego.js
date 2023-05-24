@@ -12,6 +12,9 @@ export default class Juego extends Phaser.Scene {
     // init variables
     // take data passed from other scenes
     // data object param {}
+
+    this.cantidadEstrellas = 0;
+    console.log("Prueba !");
   }
 
   preload() {
@@ -19,6 +22,8 @@ export default class Juego extends Phaser.Scene {
     this.load.tilemapTiledJSON("map", "./public/tilemaps/nivel1.json");
     this.load.image("tilesFondo", "./public/assets/images/sky.png");
     this.load.image("tilesPlataforma", "./public/assets/images/platform.png");
+    this.load.image("salida", "./public/assets/images/salida.png");
+
 
     this.load.image("star", "./public/assets/images/star.png");
 
@@ -29,7 +34,11 @@ export default class Juego extends Phaser.Scene {
   }
 
   create() {
+    //tiempo
+    this.timer = this
+
     // todo / para hacer: texto de puntaje
+    
 
     //  Our player animations, turning, walking left and walking right.
     this.anims.create({
@@ -75,7 +84,7 @@ export default class Juego extends Phaser.Scene {
 
     // crear el jugador
     // Find in the Object Layer, the name "dude" and get position
-    const spawnPoint = map.findObject(
+    let spawnPoint = map.findObject(
       "objetos",
       (obj) => obj.name === "jugador"
     );
@@ -86,12 +95,22 @@ export default class Juego extends Phaser.Scene {
     //  Player physics properties. Give the little guy a slight bounce.
     this.jugador.setBounce(0.1);
     this.jugador.setCollideWorldBounds(true);
+    
+    spawnPoint = map.findObject("objetos", (obj) => obj.name === "salida");
+    console.log("spawn point salida ", spawnPoint);
+    this.salida = this.physics.add
+      .sprite(spawnPoint.x, spawnPoint.y, "salida")
+      .setScale(0.2);
+      this.salida.visible = false
 
     //  Input Events
     this.cursors = this.input.keyboard.createCursorKeys();
 
     // Create empty group of starts
     this.estrellas = this.physics.add.group();
+
+    
+
 
     // find object layer
     // if type is "stars", add to stars group
@@ -114,7 +133,27 @@ export default class Juego extends Phaser.Scene {
     this.physics.add.collider(
       this.jugador,
       this.estrellas,
-      this.recolectarEstrella
+      this.recolectarEstrella,
+      null,
+      this
+    );
+
+    this.physics.add.collider(this.salida, plataformaLayer);
+    this.physics.add.overlap(
+      this.jugador,
+      this.salida,
+      this.esVencedor,
+      () => this.cantidadEstrellas >= 1, // condicion de ejecucion
+      this
+    );
+
+
+    //mostrar cantidad estrellas en la pantalla
+    this.cantidadEstrellasTexto = this.add.text (
+      15,
+      15,
+      "Estrellas recolectadas 0",
+      { frontSize: "15px", fill: "#FFFFFF" }
     );
   }
 
@@ -141,14 +180,26 @@ export default class Juego extends Phaser.Scene {
     if (this.cursors.up.isDown && this.jugador.body.blocked.down) {
       this.jugador.setVelocityY(-330);
     }
+    console.log(this.estrellas.getTotalUsed());
   }
 
   recolectarEstrella(jugador, estrella) {
     estrella.disableBody(true, true);
+    if (this.estrellas.getTotalUsed() == 0) {
+      this.salida.visible = true
+    };
+
 
     // todo / para hacer: sumar puntaje
+    this.cantidadEstrellas++;
+
+    this.cantidadEstrellasTexto.setText(
+      "Estrellas recolectadas: " + this.cantidadEstrellas
+    );
+  }
+  
 
     // todo / para hacer: controlar si el grupo esta vacio
     // todo / para hacer: ganar el juego
   }
-}
+
