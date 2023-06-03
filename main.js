@@ -1,5 +1,14 @@
 import Juego from "./public/assets/scenes/Juego.js";
 
+import Nivel2 from "./public/assets/scenes/nivel2.js";
+
+import Nivel3 from "./public/assets/scenes/nivel3.js";
+
+import Win from "./public/assets/scenes/levelwin.js"; 
+
+import Gameover from "./public/assets/scenes/gameover.js"; 
+
+
 // Create a new Phaser config object
 const config = {
   type: Phaser.AUTO,
@@ -27,7 +36,7 @@ const config = {
   // List of scenes to load
   // Only the first scene will be shown
   // Remember to import the scene before adding it to the list
-  scene: [Juego],
+  scene: [Juego, Nivel2, Nivel3, Win, Gameover,],
 };
 
 // Create a new Phaser game instance
